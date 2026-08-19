@@ -1,0 +1,7 @@
+# Main environment: robot motion, camera recording, and GPU YOLO tracking.
+PyYAML==6.0.3
+aiortc==1.15.0
+unitree-webrtc-connect==2.2.0
+numpy==2.4.3
+opencv-python==4.13.0.92
+ultralytics==8.4.121

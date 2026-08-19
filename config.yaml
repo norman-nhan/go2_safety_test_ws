@@ -1,0 +1,123 @@
+# Shared runtime settings for the programs under scripts/.
+# Robot IP is intentionally not stored here; set GO2IP in setup.sh instead.
+
+connection:
+  # Optional 16-byte AES key used by the WebRTC connection.
+  # Keep this empty unless the robot connection has been configured with a key.
+  aes_128_key: ""
+
+# Movement performed by the hand-gesture scenarios (for example c1 and c3).
+gesture_movement:
+  # Forward velocity in metres per second.
+  forward_speed: 0.7
+  # Length of one forward movement command, in seconds.
+  move_seconds: 1.0
+  # Minimum pause between accepted movement gestures, in seconds.
+  cooldown_seconds: 3.0
+
+# MediaPipe hand tracking and STOP/WAVING classification settings.
+# Hand movement distances are normalized image coordinates: 1.0 is the full
+# image width or height, so these values do not represent metres.
+hand_detection:
+  # Minimum confidence for detecting a new hand (range 0.0-1.0).
+  detection_confidence: 0.55
+  # Minimum confidence for tracking a previously detected hand (0.0-1.0).
+  tracking_confidence: 0.55
+
+  # An open hand must remain nearly still this long to become STOP (seconds).
+  stop_hold_seconds: 0.7
+  # Maximum accumulated hand travel allowed while recognizing STOP.
+  # Increase this if natural hand jiggle prevents STOP detection.
+  stop_max_travel: 0.045
+
+  # Amount of recent hand-position history retained for wave analysis (seconds).
+  wave_window_seconds: 1.4
+  # Minimum movement between samples; smaller changes are treated as jitter.
+  wave_min_step: 0.008
+  # Minimum accumulated movement required to classify WAVING.
+  wave_min_travel: 0.10
+  # Minimum average normalized hand speed required for WAVING (units/second).
+  wave_min_speed: 0.10
+  # Minimum duration of the wave movement, in seconds.
+  wave_min_duration: 0.30
+  # Minimum number of usable position samples required for WAVING.
+  wave_min_samples: 5
+  # How recently meaningful movement must have occurred (seconds).
+  wave_activity_seconds: 0.70
+  # Briefly retain an open-hand state when MediaPipe loses it (seconds).
+  wave_open_grace_seconds: 0.25
+  # Keep the recognized gesture visible/stable for this duration (seconds).
+  gesture_latch_seconds: 0.45
+
+scenarios:
+  # c2 moves forward until STOP is detected or the safety timeout is reached.
+  c2:
+    # Forward velocity in metres per second.
+    forward_speed: 0.45
+    # Continue moving for this long after STOP is recognized (seconds).
+    stop_delay_seconds: 0.7
+    # Fail-safe maximum duration of forward movement (seconds).
+    max_move_seconds: 3.0
+
+  # Repeated body-angle motion settings, currently used by wetshaking.py.
+  # The standalone nodding.py and say_no.py scripts use their own tested values.
+  body_motion:
+    # Reserved amplitude for shared nod/say-no motion, in degrees.
+    amplitude_degrees: 10.0
+    # Roll amplitude used by the wet-shaking motion, in degrees.
+    wet_shake_degrees: 30.0
+    # Number of complete oscillations per second.
+    frequency_hz: 1.5
+    # Total motion duration, in seconds.
+    duration_seconds: 4.0
+    # Number of body-angle commands sent per second.
+    update_hz: 15.0
+
+# Camera recording settings used by scripts/record.py.
+recording:
+  # Output directory relative to the workspace root.
+  directory: recordings
+  # Requested output video frame rate.
+  fps: 30.0
+  # Show a live OpenCV preview while recording.
+  preview: true
+
+# Person-following settings used by scripts/tracking.py.
+tracking:
+  # YOLO segmentation model path relative to the workspace root.
+  model_path: weights/yolo11n-seg.pt
+  # Inference device: "0" selects the first CUDA GPU; use "cpu" for CPU.
+  device: "0"
+  # Square YOLO inference resolution in pixels. Higher values cost more compute.
+  image_size: 640
+  # Minimum YOLO person-detection confidence (range 0.0-1.0).
+  confidence: 0.25
+
+  # No turning is requested while horizontal target error is inside this band.
+  # The error is normalized, where roughly 1.0 is one full image width.
+  center_deadband: 0.08
+  # Proportional gain converting horizontal error into yaw speed.
+  yaw_kp: 0.8
+  # Smallest non-zero turning speed, in radians per second.
+  min_yaw_speed: 0.12
+  # Maximum turning speed, in radians per second.
+  max_yaw_speed: 0.7
+  # New-measurement weight for target-position smoothing (range 0.0-1.0).
+  # Larger values react faster; smaller values produce smoother tracking.
+  target_smoothing: 0.35
+  # Stop tracking motion after losing the person for this long (seconds).
+  detection_timeout: 0.5
+
+  # Desired person's segmented area as a fraction of the camera image.
+  # Below min_person_area the robot moves forward; above max_person_area it
+  # moves backward when allow_backward is true. The gap prevents in/out looping.
+  min_person_area: 0.18
+  max_person_area: 0.25
+  # Forward and backward following speeds, in metres per second.
+  forward_speed: 0.5
+  backward_speed: 0.5
+  # Allow backing away when the person is too close. Disable if the rear path
+  # cannot be monitored safely or obstacle coverage behind the robot is limited.
+  allow_backward: true
+  # Sign correction for camera/robot yaw direction; use 1.0 or -1.0.
+  yaw_direction: -1.0

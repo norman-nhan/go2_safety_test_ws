@@ -1,0 +1,8 @@
+**__pycache__**
+.agents
+.codex
+recordings
+.env
+**.pt
+# This is the model configured by tracking.model_path in config.yaml.
+weights/yolo11n-seg.pt

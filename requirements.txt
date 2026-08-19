@@ -1,0 +1,14 @@
+# Python packages tested in the go2sim environment.
+# Install with: python -m pip install -r requirements.txt
+
+PyYAML==6.0.3
+# MediaPipe 0.10.21 requires NumPy below 2. Ultralytics requires the standard
+# OpenCV distribution by package name, while MediaPipe uses the contrib build.
+# Keep both OpenCV packages on the same compatible version.
+numpy==1.26.4
+opencv-python==4.11.0.86
+opencv-contrib-python==4.11.0.86
+mediapipe==0.10.21
+aiortc==1.15.0
+ultralytics==8.4.121
+unitree-webrtc-connect==2.2.0

@@ -1,0 +1,7 @@
+# Gesture environment: isolated because MediaPipe 0.10.21 requires NumPy < 2.
+PyYAML==6.0.3
+aiortc==1.15.0
+unitree-webrtc-connect==2.2.0
+numpy==1.26.4
+opencv-contrib-python==4.11.0.86
+mediapipe==0.10.21

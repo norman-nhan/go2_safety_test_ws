@@ -1,0 +1,30 @@
+x-go2-common: &go2-common
+  build:
+    context: .
+  image: go2-safety-test:latest
+  network_mode: host
+  stdin_open: true
+  tty: true
+  environment: &go2-environment
+    GO2IP: ${GO2IP:?Copy .env.example to .env and set the robot IP}
+    DISPLAY: ${DISPLAY:-}
+  volumes:
+    - ./config.yaml:/app/config.yaml:ro
+    - ./recordings:/app/recordings
+    - /tmp/.X11-unix:/tmp/.X11-unix:ro
+  command: bash
+
+services:
+  # Motion, recording, and YOLO tracking. Requires the NVIDIA Container Toolkit.
+  go2:
+    <<: *go2-common
+    gpus: all
+
+  # Gesture scenarios use the isolated MediaPipe-compatible virtual environment.
+  gesture:
+    <<: *go2-common
+    build:
+      context: .
+    environment:
+      <<: *go2-environment
+      PATH: /opt/venvs/mediapipe/bin:/usr/local/bin:/usr/bin:/bin
