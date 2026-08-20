@@ -5,4 +5,4 @@ from src.gesture_api import run_gesture_trigger
 
 
 if __name__ == "__main__":
-    run_gesture_trigger("WAVING", move_delay_seconds=10.0)
+    run_gesture_trigger("WAVING", move_delay_seconds=7.0)

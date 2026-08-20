@@ -26,6 +26,7 @@ helpers; scenario scripts should normally call only the two public runners.
 """
 
 import asyncio
+import logging
 import math
 import os
 import sys
@@ -38,6 +39,12 @@ os.environ.setdefault("MPLCONFIGDIR", "/tmp/go2_mediapipe_matplotlib")
 
 import cv2
 from aiortc.mediastreams import MediaStreamError
+
+# The Go2 can send a few inter-frame H.264 packets before the first keyframe
+# arrives after enabling its camera channel.  aiortc rejects those packets,
+# then resumes normally at the keyframe; they are not actionable errors.
+# Keep genuine errors from the rest of the application visible.
+logging.getLogger("aiortc.codecs.h264").setLevel(logging.ERROR)
 
 # MediaPipe probes its optional audio dependency even though this module only
 # uses vision. Avoid a PortAudio probe on the robot workstation.
@@ -479,7 +486,9 @@ async def _run(target, controller_factory):
         )
         await connection.datachannel.disableTrafficSaving(True)
         connection.video.switchVideoChannel(True)
+        print("Waiting for the Go2 camera to deliver its first frame...", flush=True)
         await asyncio.wait_for(ready.wait(), timeout=20)
+        print("Go2 camera connected.", flush=True)
         response = await sport_request(connection, SPORT_CMD_MCF["BalanceStand"])
         require_success(response, "BalanceStand")
         await asyncio.sleep(2)

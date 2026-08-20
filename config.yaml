@@ -13,7 +13,7 @@ gesture_movement:
   # Length of one forward movement command, in seconds.
   move_seconds: 1.0
   # Minimum pause between accepted movement gestures, in seconds.
-  cooldown_seconds: 3.0
+  cooldown_seconds: 2.0
 
 # MediaPipe hand tracking and STOP/WAVING classification settings.
 # Hand movement distances are normalized image coordinates: 1.0 is the full
@@ -53,9 +53,9 @@ scenarios:
   # c2 moves forward until STOP is detected or the safety timeout is reached.
   c2:
     # Forward velocity in metres per second.
-    forward_speed: 0.45
+    forward_speed: 0.5
     # Continue moving for this long after STOP is recognized (seconds).
-    stop_delay_seconds: 0.7
+    stop_delay_seconds: 0.5
     # Fail-safe maximum duration of forward movement (seconds).
     max_move_seconds: 3.0
 

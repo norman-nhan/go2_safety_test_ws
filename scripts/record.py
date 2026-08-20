@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import logging
 import time
 from datetime import datetime
 from pathlib import Path
@@ -9,6 +10,10 @@ from pathlib import Path
 import cv2
 from aiortc.mediastreams import MediaStreamError
 from unitree_webrtc_connect import UnitreeWebRTCConnection, WebRTCConnectionMethod
+
+# The Go2 may send inter-frame H.264 packets before its first keyframe after
+# enabling the video channel. aiortc safely drops these transient packets.
+logging.getLogger("aiortc.codecs.h264").setLevel(logging.ERROR)
 
 import _bootstrap  # noqa: F401
 from src.common_api import CONNECTION_CONFIG, ROBOT_IP
@@ -35,6 +40,7 @@ async def record(name=None):
     fps = float(RECORDING_CONFIG["fps"])
     preview = bool(RECORDING_CONFIG["preview"])
     stop_event = asyncio.Event()
+    camera_ready = asyncio.Event()
     video_done = asyncio.Event()
     writer = None
     frames = 0
@@ -67,6 +73,7 @@ async def record(name=None):
                         raise RuntimeError(f"Could not open MP4 writer: {output}")
                     started = time.monotonic()
                     print(f"Recording to {output} at {width}x{height}, {fps:g} FPS")
+                    camera_ready.set()
                 writer.write(image)
                 frames += 1
                 if preview:
@@ -83,7 +90,9 @@ async def record(name=None):
         connected = True
         connection.video.add_track_callback(receive)
         connection.video.switchVideoChannel(True)
-        print("Press q, Esc, or Ctrl+C to stop recording.")
+        print("Waiting for the Go2 camera to deliver its first frame...", flush=True)
+        await asyncio.wait_for(camera_ready.wait(), timeout=20)
+        print("Go2 camera connected. Press q, Esc, or Ctrl+C to stop recording.")
         await stop_event.wait()
     finally:
         stop_event.set()
